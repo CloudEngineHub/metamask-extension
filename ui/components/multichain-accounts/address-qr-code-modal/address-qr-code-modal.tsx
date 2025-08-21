@@ -67,9 +67,12 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
                   // eslint-disable-next-line @typescript-eslint/naming-convention
                   __html: qrImage.createTableTag(5, 16),
                 }}
+                // Background and border must remain white regardless of theme
                 className="bg-white border-4 border-white rounded-2xl"
               />
+
               <Box
+                // Background and border must remain white regardless of theme
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-8 border-white bg-white rounded-xl flex"
                 justifyContent={BoxJustifyContent.Center}
                 alignItems={BoxAlignItems.Center}
