@@ -1,0 +1,106 @@
+import React from 'react';
+import qrCode from 'qrcode-generator';
+import {
+  Text,
+  TextVariant,
+  FontWeight,
+  TextAlign,
+  Button,
+  Icon,
+  IconName,
+  ButtonVariant,
+  ButtonSize,
+  Box,
+  BoxFlexDirection,
+  BoxBackgroundColor,
+  BoxJustifyContent,
+  BoxAlignItems,
+  AvatarNetwork,
+} from '@metamask/design-system-react';
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from '../../component-library';
+
+type AddressQRCodeModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  address: string;
+  qrCode?: React.ReactNode;
+};
+
+/**
+ * AddressQRCodeModal
+ *
+ * Renders a modal displaying a QR code for a given address.
+ */
+export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
+  isOpen,
+  onClose,
+  address,
+}) => {
+  const qrImage = qrCode(4, 'M');
+  qrImage.addData(address);
+  qrImage.make();
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader onClose={onClose}>Account 1 / Ethereum</ModalHeader>
+        <ModalBody>
+          <Box flexDirection={BoxFlexDirection.Column} gap={4}>
+            <Box
+              className="relative flex"
+              justifyContent={BoxJustifyContent.Center}
+              alignItems={BoxAlignItems.Center}
+            >
+              <Box
+                dangerouslySetInnerHTML={{
+                  // TODO: Fix in https://github.com/MetaMask/metamask-extension/issues/31860
+                  // eslint-disable-next-line @typescript-eslint/naming-convention
+                  __html: qrImage.createTableTag(5, 16),
+                }}
+                className="bg-white border-4 border-white rounded-2xl"
+              />
+              <Box className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-8 border-white bg-white rounded-xl">
+                <AvatarNetwork
+                  name="Ethereum"
+                  src="https://assets.metamask.io/networks/mainnet/icon.png"
+                />
+              </Box>
+            </Box>
+            <Text textAlign={TextAlign.Center} variant={TextVariant.HeadingSm}>
+              Ethereum Address
+            </Text>
+            <Text textAlign={TextAlign.Center}>
+              Use this address to receive tokens and collectibles on Ethereum
+            </Text>
+
+            <Box flexDirection={BoxFlexDirection.Column} gap={2}>
+              <Button
+                variant={ButtonVariant.Secondary}
+                startIconName={IconName.Copy}
+                size={ButtonSize.Lg}
+                isFullWidth
+              >
+                EqT4z...a8f3x
+              </Button>
+              <Button
+                variant={ButtonVariant.Tertiary}
+                size={ButtonSize.Lg}
+                isFullWidth
+              >
+                Share
+              </Button>
+            </Box>
+          </Box>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
+  );
+};
