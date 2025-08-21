@@ -32,6 +32,11 @@ type AddressQRCodeModalProps = {
  * AddressQRCodeModal
  *
  * Renders a modal displaying a QR code for a given address.
+ *
+ * @param options0
+ * @param options0.isOpen
+ * @param options0.onClose
+ * @param options0.address
  */
 export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
   isOpen,
