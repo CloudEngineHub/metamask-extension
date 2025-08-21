@@ -39,7 +39,6 @@ type AddressQRCodeModalProps = Omit<
  * @param options0
  * @param options0.isOpen
  * @param options0.onClose
- * @param options0.address
  */
 export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
   isOpen,
