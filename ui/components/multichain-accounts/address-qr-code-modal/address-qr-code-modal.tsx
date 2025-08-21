@@ -3,16 +3,13 @@ import qrCode from 'qrcode-generator';
 import {
   Text,
   TextVariant,
-  FontWeight,
   TextAlign,
   Button,
-  Icon,
   IconName,
   ButtonVariant,
   ButtonSize,
   Box,
   BoxFlexDirection,
-  BoxBackgroundColor,
   BoxJustifyContent,
   BoxAlignItems,
   AvatarNetwork,
@@ -23,7 +20,6 @@ import {
   ModalContent,
   ModalHeader,
   ModalBody,
-  ModalFooter,
 } from '../../component-library';
 
 type AddressQRCodeModalProps = {
