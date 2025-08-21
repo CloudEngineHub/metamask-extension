@@ -21,11 +21,14 @@ import {
   ModalHeader,
   ModalBody,
 } from '../../component-library';
+import type { ModalProps } from '../../component-library';
 
-type AddressQRCodeModalProps = {
+type AddressQRCodeModalProps = Omit<
+  ModalProps,
+  'isOpen' | 'onClose' | 'children'
+> & {
   isOpen: boolean;
   onClose: () => void;
-  address: string;
 };
 
 /**
@@ -41,8 +44,8 @@ type AddressQRCodeModalProps = {
 export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
   isOpen,
   onClose,
-  address = '0x1234567890123456789012345678901234567890',
 }) => {
+  const address = '0x1234567890123456789012345678901234567890';
   const qrImage = qrCode(4, 'M');
   qrImage.addData(address);
   qrImage.make();
