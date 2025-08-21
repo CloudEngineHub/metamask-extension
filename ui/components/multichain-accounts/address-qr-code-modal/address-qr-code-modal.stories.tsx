@@ -28,7 +28,4 @@ export const Default: Story = {
       </Box>
     );
   },
-  args: {
-    address: '0x1234abcd56789012345678901234567890123456',
-  },
 };

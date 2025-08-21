@@ -29,9 +29,7 @@ import {
 type AddressQRCodeModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
   address: string;
-  qrCode?: React.ReactNode;
 };
 
 /**
@@ -42,7 +40,7 @@ type AddressQRCodeModalProps = {
 export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
   isOpen,
   onClose,
-  address,
+  address = '0x1234567890123456789012345678901234567890',
 }) => {
   const qrImage = qrCode(4, 'M');
   qrImage.addData(address);
@@ -67,11 +65,12 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
                 }}
                 className="bg-white border-4 border-white rounded-2xl"
               />
-              <Box className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-8 border-white bg-white rounded-xl">
-                <AvatarNetwork
-                  name="Ethereum"
-                  src="https://assets.metamask.io/networks/mainnet/icon.png"
-                />
+              <Box
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-8 border-white bg-white rounded-xl flex"
+                justifyContent={BoxJustifyContent.Center}
+                alignItems={BoxAlignItems.Center}
+              >
+                <AvatarNetwork name="Ethereum" src="./images/ethereum.svg" />
               </Box>
             </Box>
             <Text textAlign={TextAlign.Center} variant={TextVariant.HeadingSm}>
