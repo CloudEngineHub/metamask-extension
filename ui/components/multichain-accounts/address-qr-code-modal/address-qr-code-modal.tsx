@@ -28,6 +28,8 @@ import { useI18nContext } from '../../../hooks/useI18nContext';
 import { shortenAddress } from '../../../helpers/utils/util';
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';
 import { getImageForChainId } from '../../../selectors/multichain';
+import { getInternalAccountByAddress } from '../../../selectors/selectors';
+import { getProviderConfig } from '../../../../shared/modules/selectors/networks';
 import { getMultichainAccountUrl } from '../../../helpers/utils/multichain/blockExplorer';
 import { openBlockExplorer } from '../../multichain/menu-items/view-explorer-menu-item';
 import { getAccountTypeCategory } from '../../../pages/multichain-accounts/account-details';
@@ -45,8 +47,6 @@ type AddressQRCodeModalProps = Omit<
   isOpen: boolean;
   onClose: () => void;
   address: string;
-  accountName: string;
-  networkName: string;
   chainId: string;
   account?: InternalAccount;
 };
@@ -55,15 +55,19 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
   isOpen,
   onClose,
   address,
-  accountName,
-  networkName,
   chainId,
   account,
 }) => {
   const t = useI18nContext();
   const [copied, handleCopy] = useCopyToClipboard();
 
+  // Get account and network info from selectors
+  const accountInfo = useSelector((state) => getInternalAccountByAddress(state, address));
+  const providerConfig = useSelector(getProviderConfig);
   const networkImageSrc = useSelector(() => getImageForChainId(chainId));
+  
+  const accountName = accountInfo?.metadata?.name || '';
+  const networkName = providerConfig?.nickname || providerConfig?.name || '';
   const truncatedAddress = shortenAddress(address);
 
   // Generate QR code
@@ -109,7 +113,12 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader onClose={onClose}>
+        <ModalHeader
+          onClose={onClose}
+          backButtonProps={{
+            'data-testid': 'address-qr-code-modal-back-button',
+          }}
+        >
           {t('addressQrCodeModalTitle', [accountName, networkName])}
         </ModalHeader>
         <ModalBody>
