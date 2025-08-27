@@ -15,6 +15,7 @@ import {
   BoxAlignItems,
   AvatarNetwork,
 } from '@metamask/design-system-react';
+import type { InternalAccount } from '@metamask/keyring-internal-api';
 import {
   Modal,
   ModalOverlay,
@@ -23,7 +24,6 @@ import {
   ModalBody,
 } from '../../component-library';
 import type { ModalProps } from '../../component-library';
-import type { InternalAccount } from '@metamask/keyring-api';
 import { useI18nContext } from '../../../hooks/useI18nContext';
 import { shortenAddress } from '../../../helpers/utils/util';
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';
@@ -31,6 +31,12 @@ import { getImageForChainId } from '../../../selectors/multichain';
 import { getMultichainAccountUrl } from '../../../helpers/utils/multichain/blockExplorer';
 import { openBlockExplorer } from '../../multichain/menu-items/view-explorer-menu-item';
 import { getAccountTypeCategory } from '../../../pages/multichain-accounts/account-details';
+
+// Constants for QR code generation
+const QR_CODE_TYPE_NUMBER = 4;
+const QR_CODE_CELL_SIZE = 5;
+const QR_CODE_MARGIN = 16;
+const QR_CODE_ERROR_CORRECTION_LEVEL = 'M';
 
 type AddressQRCodeModalProps = Omit<
   ModalProps,
@@ -45,25 +51,6 @@ type AddressQRCodeModalProps = Omit<
   account?: InternalAccount;
 };
 
-const QR_CODE_TYPE_NUMBER = 4;
-const QR_CODE_CELL_SIZE = 5;
-const QR_CODE_MARGIN = 16;
-const QR_CODE_ERROR_CORRECTION_LEVEL = 'M';
-
-/**
- * AddressQRCodeModal
- *
- * Renders a modal displaying a QR code for a given address.
- *
- * @param options0
- * @param options0.isOpen - Whether the modal is open
- * @param options0.onClose - Function to close the modal
- * @param options0.address - The address to display and generate QR code for
- * @param options0.accountName - The name of the account
- * @param options0.networkName - The name of the network
- * @param options0.chainId - The chain ID for network image and explorer functionality
- * @param options0.account - Optional internal account for account type detection
- */
 export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
   isOpen,
   onClose,
@@ -75,11 +62,11 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
 }) => {
   const t = useI18nContext();
   const [copied, handleCopy] = useCopyToClipboard();
-  
+
   const networkImageSrc = useSelector(() => getImageForChainId(chainId));
   const truncatedAddress = shortenAddress(address);
 
-  // Generate QR code with the actual address
+  // Generate QR code
   const qrImage = qrCode(QR_CODE_TYPE_NUMBER, QR_CODE_ERROR_CORRECTION_LEVEL);
   qrImage.addData(address);
   qrImage.make();
@@ -92,7 +79,7 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
     if (!account) {
       return t('viewOnExplorer');
     }
-    
+
     switch (getAccountTypeCategory(account)) {
       case 'evm':
         return t('viewAddressOnExplorer', ['Etherscan']);
@@ -107,12 +94,12 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
     if (!account) {
       return;
     }
-    
+
     const addressLink = getMultichainAccountUrl(address, {
       chainId,
       type: 'mainnet', // This should be determined based on the network
     });
-    
+
     if (addressLink) {
       openBlockExplorer(addressLink, 'Address QR Code Modal');
     }

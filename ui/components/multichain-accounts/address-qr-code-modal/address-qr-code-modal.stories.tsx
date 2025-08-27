@@ -13,7 +13,9 @@ const store = mockStore({
     localeMessages: {
       addressQrCodeModalTitle: { message: '$1 / $2' },
       addressQrCodeModalHeading: { message: '$1 Address' },
-      addressQrCodeModalDescription: { message: 'Use this address to receive tokens and collectibles on $1' },
+      addressQrCodeModalDescription: {
+        message: 'Use this address to receive tokens and collectibles on $1',
+      },
       viewOnExplorer: { message: 'View on Explorer' },
       viewAddressOnExplorer: { message: 'View address on $1' },
     },
@@ -36,7 +38,7 @@ const meta: Meta<typeof AddressQRCodeModal> = {
       description: 'The address to display and generate QR code for',
     },
     accountName: {
-      control: 'text', 
+      control: 'text',
       description: 'The name of the account',
     },
     networkName: {
@@ -68,7 +70,7 @@ const mockEthereumAccount = {
 };
 
 const mockSolanaAccount = {
-  id: 'solana-account-1', 
+  id: 'solana-account-1',
   address: 'DYw8jCTfwHNRJhhmFcbXvVDTqWMEVFBX6ZKUmG5CNSKK',
   metadata: {
     name: 'Solana Account',
