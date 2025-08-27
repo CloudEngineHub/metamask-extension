@@ -31,6 +31,11 @@ type AddressQRCodeModalProps = Omit<
   onClose: () => void;
 };
 
+const QR_CODE_TYPE_NUMBER = 4;
+const QR_CODE_CELL_SIZE = 5;
+const QR_CODE_MARGIN = 16;
+const QR_CODE_ERROR_CORRECTION_LEVEL = 'M';
+
 /**
  * AddressQRCodeModal
  *
@@ -45,7 +50,7 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
   onClose,
 }) => {
   const address = '0x1234567890123456789012345678901234567890';
-  const qrImage = qrCode(4, 'M');
+  const qrImage = qrCode(QR_CODE_TYPE_NUMBER, QR_CODE_ERROR_CORRECTION_LEVEL);
   qrImage.addData(address);
   qrImage.make();
   return (
@@ -64,7 +69,10 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
                 dangerouslySetInnerHTML={{
                   // TODO: Fix in https://github.com/MetaMask/metamask-extension/issues/31860
                   // eslint-disable-next-line @typescript-eslint/naming-convention
-                  __html: qrImage.createTableTag(5, 16),
+                  __html: qrImage.createTableTag(
+                    QR_CODE_CELL_SIZE,
+                    QR_CODE_MARGIN,
+                  ),
                 }}
                 // Background and border must remain white regardless of theme
                 className="bg-white border-4 border-white rounded-2xl"
