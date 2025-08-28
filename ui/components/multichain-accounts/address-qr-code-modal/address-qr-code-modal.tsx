@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import qrCode from 'qrcode-generator';
 import {
@@ -29,9 +29,9 @@ import { shortenAddress } from '../../../helpers/utils/util';
 import { useCopyToClipboard } from '../../../hooks/useCopyToClipboard';
 import { getImageForChainId } from '../../../selectors/multichain';
 import { getInternalAccountByAddress } from '../../../selectors/selectors';
-import { getProviderConfig } from '../../../../shared/modules/selectors/networks';
 import { getMultichainAccountUrl } from '../../../helpers/utils/multichain/blockExplorer';
 import { openBlockExplorer } from '../../multichain/menu-items/view-explorer-menu-item';
+import { MetaMetricsContext } from '../../../contexts/metametrics';
 import { getAccountTypeCategory } from '../../../pages/multichain-accounts/account-details';
 
 // Constants for QR code generation
@@ -40,7 +40,7 @@ const QR_CODE_CELL_SIZE = 5;
 const QR_CODE_MARGIN = 16;
 const QR_CODE_ERROR_CORRECTION_LEVEL = 'M';
 
-type AddressQRCodeModalProps = Omit<
+export type AddressQRCodeModalProps = Omit<
   ModalProps,
   'isOpen' | 'onClose' | 'children'
 > & {
@@ -60,14 +60,25 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
 }) => {
   const t = useI18nContext();
   const [copied, handleCopy] = useCopyToClipboard();
+  const trackEvent = useContext(MetaMetricsContext);
 
-  // Get account and network info from selectors
-  const accountInfo = useSelector((state) => getInternalAccountByAddress(state, address));
-  const providerConfig = useSelector(getProviderConfig);
+  const accountInfo = useSelector((state) =>
+    getInternalAccountByAddress(state, address),
+  );
   const networkImageSrc = useSelector(() => getImageForChainId(chainId));
-  
+
+  const networkConfigForChain = useSelector((state: any) => {
+    const isEvmChainId = !chainId.includes(':');
+    if (isEvmChainId) {
+      return state.metamask.networkConfigurationsByChainId?.[chainId];
+    } else {
+      return state.metamask.multichainNetworkConfigurationsByChainId?.[chainId];
+    }
+  });
+
   const accountName = accountInfo?.metadata?.name || '';
-  const networkName = providerConfig?.nickname || providerConfig?.name || '';
+  const networkName =
+    networkConfigForChain?.name || networkConfigForChain?.nickname || '';
   const truncatedAddress = shortenAddress(address);
 
   // Generate QR code
@@ -99,15 +110,30 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
       return;
     }
 
-    const addressLink = getMultichainAccountUrl(address, {
-      chainId,
-      type: 'mainnet', // This should be determined based on the network
-    });
+    // Convert chainId to CAIP format if it's not already
+    const caipChainId = chainId.includes(':') ? chainId : `eip155:${chainId}`;
+    const isEvmChainId = !chainId.includes(':');
+
+    const multichainNetwork = {
+      nickname: networkName,
+      isEvmNetwork: isEvmChainId,
+      chainId: caipChainId,
+      network: networkConfigForChain,
+    };
+
+    const addressLink = getMultichainAccountUrl(address, multichainNetwork);
 
     if (addressLink) {
-      openBlockExplorer(addressLink, 'Address QR Code Modal');
+      openBlockExplorer(addressLink, 'Address QR Code Modal', trackEvent);
     }
-  }, [address, chainId, account]);
+  }, [
+    address,
+    chainId,
+    account,
+    networkName,
+    networkConfigForChain,
+    trackEvent,
+  ]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -172,6 +198,7 @@ export const AddressQRCodeModal: React.FC<AddressQRCodeModalProps> = ({
                 size={ButtonSize.Lg}
                 isFullWidth
                 onClick={handleExplorerNavigation}
+                className="mb-1" // needed to show focus so it's not hidden when using keyboard navigation
               >
                 {getExplorerButtonText()}
               </Button>

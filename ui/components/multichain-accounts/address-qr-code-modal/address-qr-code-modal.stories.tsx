@@ -3,14 +3,45 @@ import { Meta, StoryObj } from '@storybook/react';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
 import { AddressQRCodeModal } from './address-qr-code-modal';
+import type { AddressQRCodeModalProps } from './address-qr-code-modal';
 import { Button } from '@metamask/design-system-react';
+import mockState from '../../../../test/data/mock-state.json';
+import {
+  MOCK_ACCOUNT_EOA,
+  MOCK_ACCOUNT_BIP122_P2WPKH,
+  MOCK_ACCOUNT_SOLANA_MAINNET,
+} from '../../../../test/data/mock-accounts';
 
-// Mock store for Storybook
 const mockStore = configureStore([]);
-const store = mockStore({
-  metamask: {
-    currentLocale: 'en',
-    localeMessages: {
+
+// Use proper multichain mock accounts with correct scopes
+const accounts = {
+  ethereum: { ...MOCK_ACCOUNT_EOA, scopes: ['eip155:*'] },
+  polygon: {
+    ...MOCK_ACCOUNT_EOA,
+    id: '2',
+    address: '0xabcdef1234567890abcdef1234567890abcdef12',
+    scopes: ['eip155:137'],
+    metadata: { ...MOCK_ACCOUNT_EOA.metadata, name: 'Polygon Account' },
+  },
+  arbitrum: {
+    ...MOCK_ACCOUNT_EOA,
+    id: '3', 
+    address: '0x2468135790abcdef1234567890abcdef12345678',
+    scopes: ['eip155:42161'],
+    metadata: { ...MOCK_ACCOUNT_EOA.metadata, name: 'Arbitrum Account' },
+  },
+  solana: { ...MOCK_ACCOUNT_SOLANA_MAINNET, scopes: ['solana:*'] },
+  bitcoin: { ...MOCK_ACCOUNT_BIP122_P2WPKH, scopes: ['bip122:*'] },
+};
+
+// Create enhanced mock state with proper multichain network configurations
+const createMockState = () => ({
+  ...mockState,
+  localeMessages: {
+    ...mockState.localeMessages,
+    current: {
+      ...mockState.localeMessages.current,
       addressQrCodeModalTitle: { message: '$1 / $2' },
       addressQrCodeModalHeading: { message: '$1 Address' },
       addressQrCodeModalDescription: {
@@ -19,44 +50,78 @@ const store = mockStore({
       viewOnExplorer: { message: 'View on Explorer' },
       viewAddressOnExplorer: { message: 'View address on $1' },
     },
-    // Mock data for selectors
+  },
+  metamask: {
+    ...mockState.metamask,
+    // Add our multichain accounts to the internal accounts
     internalAccounts: {
+      selectedAccount: accounts.ethereum.id,
       accounts: {
-        'ethereum-account-1': {
-          id: 'ethereum-account-1',
-          address: '0x1234567890123456789012345678901234567890',
-          metadata: { name: 'Account 1', keyring: { type: 'HD Key Tree' } },
-          type: 'eip155:eoa',
-        },
-        'solana-account-1': {
-          id: 'solana-account-1',
-          address: 'DYw8jCTfwHNRJhhmFcbXvVDTqWMEVFBX6ZKUmG5CNSKK',
-          metadata: { name: 'Solana Account', keyring: { type: 'Snap Keyring' } },
-          type: 'solana:mainnet',
-        },
+        ...mockState.metamask.internalAccounts.accounts,
+        [accounts.ethereum.id]: accounts.ethereum,
+        [accounts.polygon.id]: accounts.polygon,
+        [accounts.arbitrum.id]: accounts.arbitrum,
+        [accounts.solana.id]: accounts.solana,
+        [accounts.bitcoin.id]: accounts.bitcoin,
       },
     },
+    // Override the EVM network configurations to have proper names
     networkConfigurationsByChainId: {
       '0x1': {
-        chainId: '0x1',
+        ...mockState.metamask.networkConfigurationsByChainId['0x1'],
         name: 'Ethereum Mainnet',
-        nickname: 'Ethereum Mainnet',
-        rpcEndpoints: [{
-          networkClientId: 'mainnet',
-          type: 'infura',
-        }],
       },
       '0x89': {
-        chainId: '0x89', 
-        name: 'Polygon',
-        nickname: 'Polygon',
-        rpcEndpoints: [{
-          networkClientId: 'polygon',
-          type: 'infura',
-        }],
+        chainId: '0x89',
+        name: 'Polygon Mainnet',
+        nativeCurrency: 'MATIC',
+        rpcEndpoints: [
+          {
+            networkClientId: 'polygon',
+            type: 'custom',
+            url: 'https://polygon-rpc.com',
+          },
+        ],
+        defaultRpcEndpointIndex: 0,
+        blockExplorerUrls: ['https://polygonscan.com'],
+        defaultBlockExplorerUrlIndex: 0,
+      },
+      '0xa4b1': {
+        chainId: '0xa4b1',
+        name: 'Arbitrum One',
+        nativeCurrency: 'ETH',
+        rpcEndpoints: [
+          {
+            networkClientId: 'arbitrum',
+            type: 'custom',
+            url: 'https://arb1.arbitrum.io/rpc',
+          },
+        ],
+        defaultRpcEndpointIndex: 0,
+        blockExplorerUrls: ['https://arbiscan.io'],
+        defaultBlockExplorerUrlIndex: 0,
+      },
+      ...Object.fromEntries(
+        Object.entries(
+          mockState.metamask.networkConfigurationsByChainId,
+        ).filter(([chainId]) => !['0x1'].includes(chainId)),
+      ),
+    },
+    // Add multichain network configurations for non-EVM chains
+    multichainNetworkConfigurationsByChainId: {
+      'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp': {
+        chainId: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+        name: 'Solana Mainnet',
+        nativeCurrency: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp/slip44:501',
+        isEvm: false,
+      },
+      'bip122:000000000019d6689c085ae165831e93': {
+        chainId: 'bip122:000000000019d6689c085ae165831e93',
+        name: 'Bitcoin Mainnet',
+        nativeCurrency: 'bip122:000000000019d6689c085ae165831e93/slip44:0',
+        isEvm: false,
       },
     },
-    selectedNetworkClientId: 'mainnet',
   },
 });
 
@@ -65,7 +130,7 @@ const meta: Meta<typeof AddressQRCodeModal> = {
   component: AddressQRCodeModal,
   decorators: [
     (Story) => (
-      <Provider store={store}>
+      <Provider store={mockStore(createMockState())}>
         <Story />
       </Provider>
     ),
@@ -86,32 +151,7 @@ export default meta;
 
 type Story = StoryObj<typeof AddressQRCodeModal>;
 
-// Mock account objects for different types
-const mockEthereumAccount = {
-  id: 'ethereum-account-1',
-  address: '0x1234567890123456789012345678901234567890',
-  metadata: {
-    name: 'Account 1',
-    keyring: { type: 'HD Key Tree' },
-  },
-  options: {},
-  methods: [],
-  type: 'eip155:eoa',
-};
-
-const mockSolanaAccount = {
-  id: 'solana-account-1',
-  address: 'DYw8jCTfwHNRJhhmFcbXvVDTqWMEVFBX6ZKUmG5CNSKK',
-  metadata: {
-    name: 'Solana Account',
-    keyring: { type: 'Snap Keyring' },
-  },
-  options: {},
-  methods: [],
-  type: 'solana:mainnet',
-};
-
-const StoryWrapper = ({ children, ...args }: any) => {
+const StoryWrapper = (args: AddressQRCodeModalProps) => {
   const [isOpen, setIsOpen] = useState(true);
   return (
     <>
@@ -127,57 +167,58 @@ const StoryWrapper = ({ children, ...args }: any) => {
 
 export const EthereumMainnet: Story = {
   args: {
-    address: '0x1234567890123456789012345678901234567890',
+    address: accounts.ethereum.address,
     chainId: '0x1',
-    account: mockEthereumAccount,
+    account: accounts.ethereum,
   },
   render: (args) => <StoryWrapper {...args} />,
 };
 
-export const PolygonNetwork: Story = {
+export const PolygonMainnet: Story = {
   args: {
-    address: '0xabcdef1234567890abcdef1234567890abcdef12',
+    address: accounts.polygon.address,
     chainId: '0x89',
-    account: mockEthereumAccount,
+    account: accounts.polygon,
+  },
+  render: (args) => <StoryWrapper {...args} />,
+};
+
+export const ArbitrumOne: Story = {
+  args: {
+    address: accounts.arbitrum.address,
+    chainId: '0xa4b1',
+    account: accounts.arbitrum,
   },
   render: (args) => <StoryWrapper {...args} />,
 };
 
 export const SolanaMainnet: Story = {
   args: {
-    address: 'DYw8jCTfwHNRJhhmFcbXvVDTqWMEVFBX6ZKUmG5CNSKK',
-    chainId: 'solana:mainnet',
-    account: mockSolanaAccount,
+    address: accounts.solana.address,
+    chainId: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+    account: accounts.solana,
+  },
+  render: (args) => <StoryWrapper {...args} />,
+};
+
+export const BitcoinMainnet: Story = {
+  args: {
+    address: accounts.bitcoin.address,
+    chainId: 'bip122:000000000019d6689c085ae165831e93',
+    account: accounts.bitcoin,
   },
   render: (args) => <StoryWrapper {...args} />,
 };
 
 export const LongAccountName: Story = {
   args: {
-    address: '0x9876543210987654321098765432109876543210',
+    address: accounts.ethereum.address,
     chainId: '0x1',
     account: {
-      ...mockEthereumAccount,
-      address: '0x9876543210987654321098765432109876543210',
+      ...accounts.ethereum,
       metadata: {
-        ...mockEthereumAccount.metadata,
+        ...accounts.ethereum.metadata,
         name: 'My Very Long Account Name That Should Be Truncated Properly',
-      },
-    },
-  },
-  render: (args) => <StoryWrapper {...args} />,
-};
-
-export const ArbitrumNetwork: Story = {
-  args: {
-    address: '0x2468135790abcdef1234567890abcdef12345678',
-    chainId: '0xa4b1',
-    account: {
-      ...mockEthereumAccount,
-      address: '0x2468135790abcdef1234567890abcdef12345678',
-      metadata: {
-        ...mockEthereumAccount.metadata,
-        name: 'Arbitrum Account',
       },
     },
   },
@@ -187,7 +228,7 @@ export const ArbitrumNetwork: Story = {
 export const WithoutAccount: Story = {
   args: {
     address: '0x1111222233334444555566667777888899990000',
-    chainId: '0x999',
+    chainId: '0x1',
     // No account prop provided
   },
   render: (args) => <StoryWrapper {...args} />,

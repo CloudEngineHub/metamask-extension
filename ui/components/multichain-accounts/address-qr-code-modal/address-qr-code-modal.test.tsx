@@ -3,31 +3,40 @@ import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import * as utilsModule from '../../../helpers/utils/util';
 import * as copyHookModule from '../../../hooks/useCopyToClipboard';
 import * as multichainSelectors from '../../../selectors/multichain';
-import * as selectors from '../../../selectors/selectors';
+// import * as selectors from '../../../selectors/selectors';
 import * as networkSelectors from '../../../../shared/modules/selectors/networks';
 import * as blockExplorerUtils from '../../../helpers/utils/multichain/blockExplorer';
 import * as explorerMenuItem from '../../multichain/menu-items/view-explorer-menu-item';
+
+// Mock the getInternalAccountByAddress selector before importing the component
+jest.mock('../../../selectors/selectors', () => ({
+  getInternalAccountByAddress: jest.fn(),
+}));
 
 import { AddressQRCodeModal } from './address-qr-code-modal';
 
 // Mock modules
 jest.mock('../../../helpers/utils/util');
 jest.mock('../../../hooks/useCopyToClipboard');
-jest.mock('../../../selectors/multichain');
-jest.mock('../../../selectors/selectors');
+jest.mock('../../../selectors/multichain', () => ({
+  getImageForChainId: jest.fn(),
+}));
+// jest.mock('../../../selectors/selectors');
 jest.mock('../../../../shared/modules/selectors/networks');
 jest.mock('../../../helpers/utils/multichain/blockExplorer');
 jest.mock('../../multichain/menu-items/view-explorer-menu-item');
 jest.mock('../../../pages/multichain-accounts/account-details');
+jest.mock('../../../../shared/modules/selectors/smart-transactions');
+jest.mock('../../../../shared/modules/selectors/index');
 
 const mockShortenAddress = jest.mocked(utilsModule.shortenAddress);
 const mockUseCopyToClipboard = jest.mocked(copyHookModule.useCopyToClipboard);
 const mockGetImageForChainId = jest.mocked(
   multichainSelectors.getImageForChainId,
 );
-const mockGetInternalAccountByAddress = jest.mocked(
-  selectors.getInternalAccountByAddress,
-);
+// Get the mocked function
+import { getInternalAccountByAddress } from '../../../selectors/selectors';
+const mockGetInternalAccountByAddress = jest.mocked(getInternalAccountByAddress);
 const mockGetProviderConfig = jest.mocked(
   networkSelectors.getProviderConfig,
 );
@@ -57,6 +66,7 @@ describe('AddressQRCodeModal', () => {
       options: {},
       methods: [],
       type: 'eip155:eoa',
+      scopes: ['eip155:1'],
     },
   };
 
@@ -65,7 +75,7 @@ describe('AddressQRCodeModal', () => {
 
     // Setup default mocks
     mockShortenAddress.mockReturnValue('0x1234...7890');
-    mockUseCopyToClipboard.mockReturnValue([false, jest.fn()]);
+    mockUseCopyToClipboard.mockReturnValue([false, jest.fn(), jest.fn()]);
     mockGetImageForChainId.mockReturnValue('/images/ethereum.svg');
     mockGetInternalAccountByAddress.mockReturnValue({
       id: 'test-account',
@@ -77,11 +87,11 @@ describe('AddressQRCodeModal', () => {
       options: {},
       methods: [],
       type: 'eip155:eoa',
+      scopes: ['eip155:1'],
     });
     mockGetProviderConfig.mockReturnValue({
       chainId: '0x1',
       nickname: 'Ethereum Mainnet',
-      name: 'Ethereum Mainnet',
     });
     mockGetMultichainAccountUrl.mockReturnValue(
       'https://etherscan.io/address/0x1234567890123456789012345678901234567890',
@@ -134,7 +144,7 @@ describe('AddressQRCodeModal', () => {
 
   it('should handle copy functionality when copy button is clicked', async () => {
     const mockHandleCopy = jest.fn();
-    mockUseCopyToClipboard.mockReturnValue([false, mockHandleCopy]);
+    mockUseCopyToClipboard.mockReturnValue([false, mockHandleCopy, jest.fn()]);
 
     render(<AddressQRCodeModal {...mockProps} />);
 
@@ -149,7 +159,7 @@ describe('AddressQRCodeModal', () => {
   });
 
   it('should show copy success state when copy is successful', () => {
-    mockUseCopyToClipboard.mockReturnValue([true, jest.fn()]);
+    mockUseCopyToClipboard.mockReturnValue([true, jest.fn(), jest.fn()]);
 
     render(<AddressQRCodeModal {...mockProps} />);
 
@@ -222,7 +232,6 @@ describe('AddressQRCodeModal', () => {
     mockGetProviderConfig.mockReturnValue({
       chainId: '0x89',
       nickname: 'Polygon',
-      name: 'Polygon',
     });
     
     const polygonProps = {
