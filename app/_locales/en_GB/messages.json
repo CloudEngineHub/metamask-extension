@@ -660,6 +660,9 @@
   "autoLockTimeLimitDescription": {
     "message": "Set the idle time in minutes before MetaMask will become locked."
   },
+  "available": {
+    "message": "available"
+  },
   "average": {
     "message": "Average"
   },
@@ -3143,6 +3146,9 @@
   "ledgerErrorTransactionDataNotPadded": {
     "message": "Ethereum transaction's input data isn't sufficiently padded."
   },
+  "ledgerEthAppNftNotSupportedNotification": {
+    "message": "Ledger Nano S can't send or manage Ethereum NFTs. See upgrade options at https://shop.ledger.com/pages/ledger-nano-s-upgrade-program"
+  },
   "ledgerFirefoxNotSupportedDescription1": {
     "message": "We're having trouble connecting to Ledger. Check out our "
   },
@@ -4861,6 +4867,10 @@
   },
   "received": {
     "message": "Received"
+  },
+  "receivingAddress": {
+    "message": "Receiving address",
+    "description": "Page title when viewing addresses for receiving funds"
   },
   "recipientAddressPlaceholderNew": {
     "message": "Enter public address (0x) or domain name"
