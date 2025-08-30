@@ -60,6 +60,7 @@ import {
   ACCOUNT_DETAILS_ROUTE,
   ACCOUNT_DETAILS_QR_CODE_ROUTE,
   ACCOUNT_LIST_PAGE_ROUTE,
+  ADD_WALLET_PAGE_ROUTE,
   MULTICHAIN_ACCOUNT_DETAILS_PAGE_ROUTE,
   MULTICHAIN_WALLET_DETAILS_PAGE_ROUTE,
   NONEVM_BALANCE_CHECK_ROUTE,
@@ -143,6 +144,7 @@ import { SmartAccountUpdate } from '../confirmations/components/confirm/smart-ac
 import { MultichainAccountDetails } from '../multichain-accounts/account-details';
 import { AddressQRCode } from '../multichain-accounts/address-qr-code';
 import { AccountList } from '../multichain-accounts/account-list';
+import { AddWalletPage } from '../multichain-accounts/add-wallet-page';
 import { WalletDetailsPage } from '../multichain-accounts/wallet-details-page';
 import {
   getConnectingLabel,
@@ -593,6 +595,11 @@ export default function Routes() {
           <Authenticated
             path={ACCOUNT_LIST_PAGE_ROUTE}
             component={AccountList}
+            exact
+          />
+          <Authenticated
+            path={ADD_WALLET_PAGE_ROUTE}
+            component={AddWalletPage}
             exact
           />
           <Authenticated
