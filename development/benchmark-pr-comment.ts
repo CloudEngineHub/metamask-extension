@@ -530,13 +530,15 @@ function generateBenchmarkComment(
  * - OWNER: Repository owner (ex.: "MetaMask")
  * - REPOSITORY: Repository name (ex.: "metamask-extension")
  * - PR_NUMBER: Pull request number to comment on
+ * - GITHUB_SHA: Head commitSha
  *
- * @throws {Error} When GitHub API request fails or required environment variables are missing
+ * @throws {Error} When GitHub API request fails or required environment variables are missing.
  */
 async function main(): Promise<void> {
-  const { PR_COMMENT_TOKEN, OWNER, REPOSITORY, PR_NUMBER } =
+  const { PR_COMMENT_TOKEN, OWNER, REPOSITORY, PR_NUMBER, GITHUB_SHA } =
     process.env as Record<string, string>;
   const N_COMMITS = 10;
+  const SHORT_SHA1 = GITHUB_SHA.slice(0, 7);
 
   if (!PR_NUMBER) {
     console.warn('No pull request detected, skipping benchmark comment');
@@ -568,6 +570,7 @@ async function main(): Promise<void> {
     return;
   }
 
+  benchmarkData.commit = SHORT_SHA1;
   const referenceData = await fetchLatestMainBenchmarkData(N_COMMITS);
 
   const commentBody = generateBenchmarkComment(benchmarkData, referenceData);
